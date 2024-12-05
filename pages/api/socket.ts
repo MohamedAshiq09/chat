@@ -1,5 +1,13 @@
 import { Server } from 'socket.io';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { Server as HttpServer } from 'http'; // Import HTTP Server type
+import { Socket } from 'net'; // Import Socket type
+
+type ExtendedSocket = Socket & {
+  server: HttpServer & {
+    io?: Server;
+  };
+};
 
 type OTSMessage = {
   id: string;
@@ -10,9 +18,13 @@ type OTSMessage = {
 const otsMessages: Record<string, OTSMessage> = {};
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (!res.socket.server.io) {
-    const io = new Server(res.socket.server);
-    res.socket.server.io = io;
+  const extendedSocket = res.socket as ExtendedSocket;
+
+  // Check if Socket.IO is already initialized
+  if (!extendedSocket.server.io) {
+    // Pass the HTTP server instance to Socket.IO
+    const io = new Server(extendedSocket.server);
+    extendedSocket.server.io = io;
 
     io.on('connection', (socket) => {
       console.log(`User connected: ${socket.id}`);
@@ -24,7 +36,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       // Receiver retrieves an OTS message
-      socket.on('get_ots', (id, callback) => {
+      socket.on('get_ots', (id: string, callback: (response: { success: boolean; message?: string; error?: string }) => void) => {
         if (otsMessages[id]) {
           const message = otsMessages[id].message;
           delete otsMessages[id]; // Self-destruct the message
@@ -38,6 +50,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         console.log(`User disconnected: ${socket.id}`);
       });
     });
+
+    console.log('Socket.IO initialized');
+  } else {
+    console.log('Socket.IO already initialized');
   }
-  res.end();
+
+  res.end(); // End the response
 }
