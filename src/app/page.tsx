@@ -90,7 +90,7 @@ export default function ChatApp() {
         </div>
       ) : (
         <div style={{ width: "90%", maxWidth: "900px", display: "flex", gap: "20px" }}>
-          {/* Sidebar */}
+         
           <div style={{ flex: "1", backgroundColor: "#2e2e2e", borderRadius: "10px", padding: "10px" }}>
             <h3 style={{ borderBottom: "1px solid #444", paddingBottom: "10px" }}>Online Users</h3>
             {onlineUsers.map((user) => (
@@ -110,7 +110,7 @@ export default function ChatApp() {
             ))}
           </div>
 
-          {/* Chat Window */}
+          
           <div style={{ flex: "2", backgroundColor: "#2e2e2e", borderRadius: "10px", padding: "10px", display: "flex", flexDirection: "column" }}>
             <h3>Chat with {selectedUser || "..."}</h3>
             <div style={{ flex: "1", overflowY: "auto", marginBottom: "10px", padding: "10px", border: "1px solid #444", borderRadius: "5px", backgroundColor: "#181818" }}>
