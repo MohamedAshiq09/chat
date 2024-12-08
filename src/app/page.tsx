@@ -56,10 +56,10 @@ export default function ChatApp() {
   };
 
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", backgroundColor: "#181818", color: "#ffffff", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ fontFamily: "Arial, sans-serif", backgroundColor: "#0e101c", color: "#ffffff", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       {!isLoggedIn ? (
         <div style={{ textAlign: "center" }}>
-          <h2>Login</h2>
+          <h2 style={{ color: "#fff", marginBottom: "20px" }}>Login</h2>
           <input
             type="text"
             placeholder="Enter your username"
@@ -68,16 +68,18 @@ export default function ChatApp() {
             style={{
               padding: "10px",
               borderRadius: "5px",
-              border: "1px solid #ccc",
+              border: "1px solid #444",
               marginBottom: "10px",
               width: "100%",
               maxWidth: "300px",
+              backgroundColor: "#1e1e2e",
+              color: "#fff",
             }}
           />
           <button
             onClick={login}
             style={{
-              backgroundColor: "#ff3b3b",
+              backgroundColor: "#4caf50",
               color: "#fff",
               border: "none",
               padding: "10px 20px",
@@ -89,9 +91,9 @@ export default function ChatApp() {
           </button>
         </div>
       ) : (
-        <div style={{ width: "90%", maxWidth: "900px", display: "flex", gap: "20px" }}>
-         
-          <div style={{ flex: "1", backgroundColor: "#2e2e2e", borderRadius: "10px", padding: "10px" }}>
+        <div style={{ width: "90%", maxWidth: "1200px", display: "flex", gap: "20px", height: "80vh" }}>
+          
+          <div style={{ flex: "1", backgroundColor: "#1e1e2e", borderRadius: "10px", padding: "20px", overflowY: "auto" }}>
             <h3 style={{ borderBottom: "1px solid #444", paddingBottom: "10px" }}>Online Users</h3>
             {onlineUsers.map((user) => (
               <div
@@ -100,9 +102,11 @@ export default function ChatApp() {
                 style={{
                   padding: "10px",
                   borderRadius: "5px",
-                  backgroundColor: selectedUser === user ? "#ff3b3b" : "transparent",
+                  backgroundColor: selectedUser === user ? "#4caf50" : "transparent",
                   cursor: "pointer",
-                  marginBottom: "5px",
+                  marginBottom: "10px",
+                  color: selectedUser === user ? "#fff" : "#aaa",
+                  fontWeight: selectedUser === user ? "bold" : "normal",
                 }}
               >
                 {user}
@@ -110,10 +114,20 @@ export default function ChatApp() {
             ))}
           </div>
 
-          
-          <div style={{ flex: "2", backgroundColor: "#2e2e2e", borderRadius: "10px", padding: "10px", display: "flex", flexDirection: "column" }}>
-            <h3>Chat with {selectedUser || "..."}</h3>
-            <div style={{ flex: "1", overflowY: "auto", marginBottom: "10px", padding: "10px", border: "1px solid #444", borderRadius: "5px", backgroundColor: "#181818" }}>
+         
+          <div style={{ flex: "3", backgroundColor: "#1e1e2e", borderRadius: "10px", display: "flex", flexDirection: "column", padding: "20px" }}>
+            <h3 style={{ color: "#4caf50" }}>Chat with {selectedUser || "..."}</h3>
+            <div
+              style={{
+                flex: "1",
+                overflowY: "auto",
+                marginTop: "10px",
+                padding: "10px",
+                border: "1px solid #444",
+                borderRadius: "10px",
+                backgroundColor: "#0e101c",
+              }}
+            >
               {chatHistory
                 .filter((msg) => msg.from === selectedUser || msg.to === selectedUser)
                 .map((msg, index) => (
@@ -121,24 +135,30 @@ export default function ChatApp() {
                     key={index}
                     style={{
                       marginBottom: "10px",
-                      textAlign: msg.from === username ? "right" : "left",
+                      display: "flex",
+                      justifyContent: msg.from === username ? "flex-end" : "flex-start",
                     }}
                   >
-                    <span
+                    <div
                       style={{
-                        display: "inline-block",
-                        padding: "10px",
-                        borderRadius: "10px",
-                        backgroundColor: msg.from === username ? "#ff3b3b" : "#444",
+                        maxWidth: "70%",
+                        padding: "10px 15px",
+                        borderRadius: "15px",
+                        backgroundColor: msg.from === username ? "#4caf50" : "#444",
                         color: "#fff",
+                        textAlign: "left",
+                        boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
                       }}
                     >
-                      {msg.message}
-                    </span>
+                      <strong>{msg.from}</strong>
+                      <p style={{ margin: 0 }}>{msg.message}</p>
+                    </div>
                   </div>
                 ))}
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+
+           
+            <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
               <input
                 type="text"
                 placeholder="Type your message"
@@ -148,15 +168,15 @@ export default function ChatApp() {
                   flex: "1",
                   padding: "10px",
                   borderRadius: "5px",
-                  border: "1px solid #ccc",
-                  backgroundColor: "#181818",
+                  border: "1px solid #444",
+                  backgroundColor: "#0e101c",
                   color: "#fff",
                 }}
               />
               <button
                 onClick={sendMessage}
                 style={{
-                  backgroundColor: "#ff3b3b",
+                  backgroundColor: "#4caf50",
                   color: "#fff",
                   border: "none",
                   padding: "10px 20px",
