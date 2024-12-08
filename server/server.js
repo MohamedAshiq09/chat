@@ -1,50 +1,46 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const cors = require("cors");
 
-// Set up Express app
 const app = express();
-app.use(cors());
 const server = http.createServer(app);
-
-// Set up Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Frontend URL
-    methods: ["GET", "POST"]
-  }
+    origin: "http://localhost:3000",  
+    methods: ["GET", "POST"],
+  },
 });
 
-// Object to store active users
-const users = {}; 
+const users = {};
 
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
 
-  // Handle user joining
-  socket.on('join', ({ username }) => {
+  socket.on("join", ({ username }) => {
     users[socket.id] = username;
-    socket.broadcast.emit('user_joined', { username });
+    console.log(`${username} joined.`);
+    socket.broadcast.emit("user_joined", { username });
+    socket.emit("online_users", Object.values(users));
   });
 
-  // Handle sending messages
-  socket.on('send_message', ({ to, message, from }) => {
-    const targetSocketId = Object.keys(users).find(key => users[key] === to);
-    if (targetSocketId) {
-      io.to(targetSocketId).emit('receive_message', { message, from });
+  socket.on("send_message", ({ to, message, from }) => {
+    const recipientSocketId = Object.keys(users).find(
+      (key) => users[key] === to
+    );
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("receive_message", { from, message });
     }
   });
 
-  // Handle user disconnecting
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     const username = users[socket.id];
     delete users[socket.id];
-    socket.broadcast.emit('user_left', { username });
+    console.log(`${username} disconnected.`);
+    io.emit("user_left", { username });
   });
 });
 
-// Start server
 server.listen(4000, () => {
-  console.log('Server is running on http://localhost:4000');
+  console.log("Server running on http://localhost:4000");
 });
