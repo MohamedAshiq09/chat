@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
 
@@ -56,10 +57,21 @@ export default function ChatApp() {
   };
 
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", backgroundColor: "#0e101c", color: "#ffffff", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div
+      style={{
+        fontFamily: "Inter, sans-serif",
+        backgroundColor: "#0e101c",
+        color: "#ffffff",
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+      }}
+    >
       {!isLoggedIn ? (
-        <div style={{ textAlign: "center" }}>
-          <h2 style={{ color: "#fff", marginBottom: "20px" }}>Login</h2>
+        <div style={{ textAlign: "center", maxWidth: "400px", width: "100%" }}>
+          <h2 style={{ color: "#4caf50", marginBottom: "20px" }}>Welcome to ChatApp</h2>
           <input
             type="text"
             placeholder="Enter your username"
@@ -69,9 +81,8 @@ export default function ChatApp() {
               padding: "10px",
               borderRadius: "5px",
               border: "1px solid #444",
-              marginBottom: "10px",
+              marginBottom: "20px",
               width: "100%",
-              maxWidth: "300px",
               backgroundColor: "#1e1e2e",
               color: "#fff",
             }}
@@ -85,15 +96,32 @@ export default function ChatApp() {
               padding: "10px 20px",
               borderRadius: "5px",
               cursor: "pointer",
+              width: "100%",
             }}
           >
             Login
           </button>
         </div>
       ) : (
-        <div style={{ width: "90%", maxWidth: "1200px", display: "flex", gap: "20px", height: "80vh" }}>
-          
-          <div style={{ flex: "1", backgroundColor: "#1e1e2e", borderRadius: "10px", padding: "20px", overflowY: "auto" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: "20px",
+            width: "100%",
+            maxWidth: "1200px",
+            height: "80vh",
+          }}
+        >
+          <div
+            style={{
+              flex: "1",
+              backgroundColor: "#1e1e2e",
+              borderRadius: "10px",
+              padding: "20px",
+              overflowY: "auto",
+            }}
+          >
             <h3 style={{ borderBottom: "1px solid #444", paddingBottom: "10px" }}>Online Users</h3>
             {onlineUsers.map((user) => (
               <div
@@ -114,18 +142,26 @@ export default function ChatApp() {
             ))}
           </div>
 
-         
-          <div style={{ flex: "3", backgroundColor: "#1e1e2e", borderRadius: "10px", display: "flex", flexDirection: "column", padding: "20px" }}>
-            <h3 style={{ color: "#4caf50" }}>Chat with {selectedUser || "..."}</h3>
+          <div
+            style={{
+              flex: "3",
+              backgroundColor: "#1e1e2e",
+              borderRadius: "10px",
+              display: "flex",
+              flexDirection: "column",
+              padding: "20px",
+            }}
+          >
+            <h3 style={{ color: "#4caf50", marginBottom: "10px" }}>Chat with {selectedUser || "..."}</h3>
             <div
               style={{
                 flex: "1",
                 overflowY: "auto",
-                marginTop: "10px",
                 padding: "10px",
                 border: "1px solid #444",
                 borderRadius: "10px",
                 backgroundColor: "#0e101c",
+                marginBottom: "10px",
               }}
             >
               {chatHistory
@@ -146,7 +182,6 @@ export default function ChatApp() {
                         borderRadius: "15px",
                         backgroundColor: msg.from === username ? "#4caf50" : "#444",
                         color: "#fff",
-                        textAlign: "left",
                         boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
                       }}
                     >
@@ -156,9 +191,7 @@ export default function ChatApp() {
                   </div>
                 ))}
             </div>
-
-           
-            <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+            <div style={{ display: "flex", gap: "10px" }}>
               <input
                 type="text"
                 placeholder="Type your message"
