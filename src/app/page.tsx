@@ -1,228 +1,162 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import io, { Socket } from "socket.io-client";
-
-let socket: typeof Socket;
+"use client"
+import React, { useState } from "react";
 
 type Message = {
   from: string;
   to: string;
   message: string;
+  timestamp: Date;
 };
+
+const DEMO_USERS = ["Alice", "Bob", "Charlie", "David"];
 
 export default function ChatApp() {
   const [username, setUsername] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
-
-  useEffect(() => {
-    socket = io("http://localhost:4000");
-
-    socket.on("user_joined", ({ username }: { username: string }) => {
-      setOnlineUsers((prev) => [...prev, username]);
-    });
-
-    socket.on("user_left", ({ username }: { username: string }) => {
-      setOnlineUsers((prev) => prev.filter((user) => user !== username));
-    });
-
-    socket.on("receive_message", ({ message, from }: { message: string; from: string }) => {
-      setChatHistory((prev) => [...prev, { from, to: username, message }]);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [username]);
+  
+  const onlineUsers = DEMO_USERS.filter(user => user !== username);
 
   const login = () => {
-    socket.emit("join", { username });
-    setIsLoggedIn(true);
+    if (username.trim()) {
+      setIsLoggedIn(true);
+    }
   };
 
-  const sendMessage = () => {
+  const sendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
     if (selectedUser && message.trim()) {
-      socket.emit("send_message", {
+      const newMessage = {
         to: selectedUser,
         message,
         from: username,
-      });
-      setChatHistory((prev) => [...prev, { from: username, to: selectedUser, message }]);
+        timestamp: new Date()
+      };
+      
+      setChatHistory(prev => [...prev, newMessage]);
+      
+      setTimeout(() => {
+        const reply = {
+          from: selectedUser,
+          to: username,
+          message: `This is a simulated reply to: ${message}`,
+          timestamp: new Date()
+        };
+        setChatHistory(prev => [...prev, reply]);
+      }, 1000);
+      
       setMessage("");
     }
   };
 
-  return (
-    <div
-      style={{
-        fontFamily: "Inter, sans-serif",
-        backgroundColor: "#0e101c",
-        color: "#ffffff",
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-      }}
-    >
-      {!isLoggedIn ? (
-        <div style={{ textAlign: "center", maxWidth: "400px", width: "100%" }}>
-          <h2 style={{ color: "#4caf50", marginBottom: "20px" }}>Welcome to ChatApp</h2>
-          <input
-            type="text"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{
-              padding: "10px",
-              borderRadius: "5px",
-              border: "1px solid #444",
-              marginBottom: "20px",
-              width: "100%",
-              backgroundColor: "#1e1e2e",
-              color: "#fff",
-            }}
-          />
-          <button
-            onClick={login}
-            style={{
-              backgroundColor: "#4caf50",
-              color: "#fff",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "5px",
-              cursor: "pointer",
-              width: "100%",
-            }}
-          >
-            Login
-          </button>
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!isLoggedIn) login();
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <h2 className="text-2xl font-bold text-green-400 text-center mb-6">Welcome to ChatApp</h2>
+          <div className="space-y-4">
+            <input
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+            />
+            <button 
+              onClick={login}
+              disabled={!username.trim()}
+              className="w-full px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white disabled:opacity-50"
+            >
+              Join Chat
+            </button>
+          </div>
         </div>
-      ) : (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            gap: "20px",
-            width: "100%",
-            maxWidth: "1200px",
-            height: "80vh",
-          }}
-        >
-          <div
-            style={{
-              flex: "1",
-              backgroundColor: "#1e1e2e",
-              borderRadius: "10px",
-              padding: "20px",
-              overflowY: "auto",
-            }}
-          >
-            <h3 style={{ borderBottom: "1px solid #444", paddingBottom: "10px" }}>Online Users</h3>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+      <div className="max-w-7xl mx-auto h-[90vh] flex gap-4">
+        <div className="w-72 bg-gray-800 rounded-lg border border-gray-700 p-4">
+          <h3 className="text-lg font-semibold text-green-400 mb-4">Online Users</h3>
+          <div className="space-y-2">
             {onlineUsers.map((user) => (
-              <div
+              <button
                 key={user}
                 onClick={() => setSelectedUser(user)}
-                style={{
-                  padding: "10px",
-                  borderRadius: "5px",
-                  backgroundColor: selectedUser === user ? "#4caf50" : "transparent",
-                  cursor: "pointer",
-                  marginBottom: "10px",
-                  color: selectedUser === user ? "#fff" : "#aaa",
-                  fontWeight: selectedUser === user ? "bold" : "normal",
-                }}
+                className={`w-full flex items-center gap-2 p-3 rounded-lg transition-colors ${
+                  selectedUser === user 
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
               >
-                {user}
-              </div>
+                <span className="truncate">{user}</span>
+              </button>
             ))}
           </div>
+        </div>
 
-          <div
-            style={{
-              flex: "3",
-              backgroundColor: "#1e1e2e",
-              borderRadius: "10px",
-              display: "flex",
-              flexDirection: "column",
-              padding: "20px",
-            }}
-          >
-            <h3 style={{ color: "#4caf50", marginBottom: "10px" }}>Chat with {selectedUser || "..."}</h3>
-            <div
-              style={{
-                flex: "1",
-                overflowY: "auto",
-                padding: "10px",
-                border: "1px solid #444",
-                borderRadius: "10px",
-                backgroundColor: "#0e101c",
-                marginBottom: "10px",
-              }}
-            >
+        <div className="flex-1 bg-gray-800 rounded-lg border border-gray-700">
+          <div className="h-full p-4 flex flex-col">
+            <h3 className="text-lg font-semibold text-green-400 mb-4">
+              {selectedUser ? `Chat with ${selectedUser}` : 'Select a user to start chatting'}
+            </h3>
+            
+            <div className="flex-1 overflow-y-auto mb-4 space-y-4">
               {chatHistory
-                .filter((msg) => msg.from === selectedUser || msg.to === selectedUser)
-                .map((msg, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      marginBottom: "10px",
-                      display: "flex",
-                      justifyContent: msg.from === username ? "flex-end" : "flex-start",
-                    }}
-                  >
+                .filter(msg => msg.from === selectedUser || msg.to === selectedUser)
+                .map((msg, index) => {
+                  const isOwnMessage = msg.from === username;
+                  return (
                     <div
-                      style={{
-                        maxWidth: "70%",
-                        padding: "10px 15px",
-                        borderRadius: "15px",
-                        backgroundColor: msg.from === username ? "#4caf50" : "#444",
-                        color: "#fff",
-                        boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-                      }}
+                      key={index}
+                      className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                     >
-                      <strong>{msg.from}</strong>
-                      <p style={{ margin: 0 }}>{msg.message}</p>
+                      <div className={`max-w-[70%] ${isOwnMessage ? 'bg-green-500' : 'bg-gray-700'} rounded-lg p-3`}>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-sm font-semibold text-white">{msg.from}</span>
+                          <span className="text-xs text-gray-300">
+                            {msg.timestamp.toLocaleTimeString()}
+                          </span>
+                        </div>
+                        <p className="text-white mt-1">{msg.message}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+
+            <form onSubmit={sendMessage} className="flex gap-2">
               <input
                 type="text"
-                placeholder="Type your message"
+                placeholder={selectedUser ? "Type your message" : "Select a user to start chatting"}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                style={{
-                  flex: "1",
-                  padding: "10px",
-                  borderRadius: "5px",
-                  border: "1px solid #444",
-                  backgroundColor: "#0e101c",
-                  color: "#fff",
-                }}
+                disabled={!selectedUser}
+                className="flex-1 px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
               />
-              <button
-                onClick={sendMessage}
-                style={{
-                  backgroundColor: "#4caf50",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
+              <button 
+                type="submit"
+                disabled={!selectedUser || !message.trim()}
+                className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white disabled:opacity-50"
               >
                 Send
               </button>
-            </div>
+            </form>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
